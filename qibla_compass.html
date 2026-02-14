@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Кибла - Направление на Мекку</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            overflow: hidden;
+        }
+        
+        .container {
+            text-align: center;
+            padding: 20px;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+        
+        .compass-container {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            margin: 0 auto 30px;
+        }
+        
+        .compass {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #3a5a9c, #1e3c72);
+            box-shadow: 
+                0 10px 40px rgba(0,0,0,0.4),
+                inset 0 2px 10px rgba(255,255,255,0.1);
+            position: relative;
+            border: 3px solid rgba(255,255,255,0.2);
+        }
+        
+        .compass-inner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 240px;
+            height: 240px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .direction-marker {
+            position: absolute;
+            font-size: 18px;
+            font-weight: bold;
+            color: rgba(255,255,255,0.6);
+        }
+        
+        .direction-n { top: 10px; left: 50%; transform: translateX(-50%); color: #ff6b6b; }
+        .direction-s { bottom: 10px; left: 50%; transform: translateX(-50%); }
+        .direction-e { right: 10px; top: 50%; transform: translateY(-50%); }
+        .direction-w { left: 10px; top: 50%; transform: translateY(-50%); }
+        
+        .kaaba-marker {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 40px;
+            height: 40px;
+            transform: translate(-50%, -50%);
+            transition: transform 0.3s ease;
+        }
+        
+        .kaaba-icon {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 4px 15px rgba(255,215,0,0.5);
+            border: 2px solid #fff;
+        }
+        
+        .kaaba-icon::before {
+            content: "🕋";
+        }
+        
+        .arrow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 4px;
+            height: 100px;
+            background: linear-gradient(to top, transparent, #ffd700);
+            transform-origin: bottom center;
+            transform: translate(-50%, -100%);
+            border-radius: 2px;
+            transition: transform 0.3s ease;
+        }
+        
+        .arrow::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 15px solid #ffd700;
+        }
+        
+        .center-dot {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 12px;
+            height: 12px;
+            background: #ffd700;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            z-index: 10;
+        }
+        
+        .info-panel {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .angle-display {
+            font-size: 48px;
+            font-weight: bold;
+            color: #ffd700;
+            margin-bottom: 5px;
+        }
+        
+        .angle-label {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .location-info {
+            font-size: 14px;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #1e3c72;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255,215,0,0.4);
+            width: 100%;
+            max-width: 280px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255,215,0,0.5);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .loading.active {
+            display: flex;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: #ffd700;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            background: rgba(255,107,107,0.2);
+            border: 1px solid #ff6b6b;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .error-message.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+    </div>
+    
+    <div class="container">
+        <h1>🧭 Кибла</h1>
+        <p class="subtitle">Направление на Священную Мекку</p>
+        
+        <div class="error-message" id="errorMessage">
+            Не удалось определить местоположение. Пожалуйста, разрешите доступ к геолокации.
+        </div>
+        
+        <div class="compass-container">
+            <div class="compass">
+                <div class="compass-inner">
+                    <div class="direction-marker direction-n">N</div>
+                    <div class="direction-marker direction-s">S</div>
+                    <div class="direction-marker direction-e">E</div>
+                    <div class="direction-marker direction-w">W</div>
+                    
+                    <div class="arrow" id="qiblaArrow"></div>
+                    <div class="center-dot"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-panel">
+            <div class="angle-display" id="angleDisplay">--°</div>
+            <div class="angle-label">угол от севера</div>
+            <div class="location-info" id="locationInfo">
+                Нажмите кнопку для определения
+            </div>
+        </div>
+        
+        <button class="btn" id="locateBtn" onclick="findQibla()">
+            📍 Определить направление
+        </button>
+    </div>
+
+    <script>
+        // Координаты Каабы в Мекке
+        const KAABA_LAT = 21.422487;
+        const KAABA_LNG = 39.826206;
+        
+        let currentHeading = 0;
+        let qiblaAngle = 0;
+        
+        function toRadians(degrees) {
+            return degrees * (Math.PI / 180);
+        }
+        
+        function toDegrees(radians) {
+            return radians * (180 / Math.PI);
+        }
+        
+        function calculateQiblaDirection(lat, lng) {
+            const latRad = toRadians(lat);
+            const lngRad = toRadians(lng);
+            const kaabaLatRad = toRadians(KAABA_LAT);
+            const kaabaLngRad = toRadians(KAABA_LNG);
+            
+            const y = Math.sin(kaabaLngRad - lngRad);
+            const x = Math.cos(latRad) * Math.tan(kaabaLatRad) - Math.sin(latRad) * Math.cos(kaabaLngRad - lngRad);
+            
+            let angle = toDegrees(Math.atan2(y, x));
+            angle = (angle + 360) % 360;
+            
+            return angle;
+        }
+        
+        function updateCompass(angle) {
+            const arrow = document.getElementById('qiblaArrow');
+            const angleDisplay = document.getElementById('angleDisplay');
+            
+            arrow.style.transform = `translate(-50%, -100%) rotate(${angle}deg)`;
+            angleDisplay.textContent = Math.round(angle) + '°';
+        }
+        
+        function findQibla() {
+            const loading = document.getElementById('loading');
+            const errorMessage = document.getElementById('errorMessage');
+            const locationInfo = document.getElementById('locationInfo');
+            const btn = document.getElementById('locateBtn');
+            
+            loading.classList.add('active');
+            errorMessage.classList.remove('active');
+            
+            if (!navigator.geolocation) {
+                loading.classList.remove('active');
+                errorMessage.textContent = 'Геолокация не поддерживается вашим устройством';
+                errorMessage.classList.add('active');
+                return;
+            }
+            
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    loading.classList.remove('active');
+                    
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    qiblaAngle = calculateQiblaDirection(lat, lng);
+                    updateCompass(qiblaAngle);
+                    
+                    locationInfo.innerHTML = `
+                        📍 Ваше местоположение:<br>
+                        ${lat.toFixed(4)}°, ${lng.toFixed(4)}°<br>
+                        <small>Повернитесь лицом на ${Math.round(qiblaAngle)}° от севера</small>
+                    `;
+                    
+                    btn.textContent = '🔄 Обновить направление';
+                    
+                    // Попытка получить данные компаса
+                    if (window.DeviceOrientationEvent) {
+                        window.addEventListener('deviceorientation', handleOrientation);
+                    }
+                },
+                (error) => {
+                    loading.classList.remove('active');
+                    errorMessage.textContent = 'Ошибка: ' + getErrorMessage(error);
+                    errorMessage.classList.add('active');
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        }
+        
+        function handleOrientation(event) {
+            let heading = event.alpha;
+            
+            if (event.webkitCompassHeading) {
+                heading = event.webkitCompassHeading;
+            } else if (event.alpha) {
+                heading = 360 - event.alpha;
+            }
+            
+            if (heading !== null) {
+                currentHeading = heading;
+                const relativeAngle = (qiblaAngle - currentHeading + 360) % 360;
+                updateCompass(relativeAngle);
+            }
+        }
+        
+        function getErrorMessage(error) {
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    return 'Доступ к геолокации запрещен. Разрешите доступ в настройках.';
+                case error.POSITION_UNAVAILABLE:
+                    return 'Информация о местоположении недоступна';
+                case error.TIMEOUT:
+                    return 'Время ожидания запроса истекло';
+                default:
+                    return 'Неизвестная ошибка';
+            }
+        }
+        
+        // Инициализация Telegram WebApp
+        if (window.Telegram && window.Telegram.WebApp) {
+            Telegram.WebApp.ready();
+            Telegram.WebApp.expand();
+        }
+    </script>
+</body>
+</html>
