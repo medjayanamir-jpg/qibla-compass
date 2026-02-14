@@ -299,18 +299,27 @@
         }
         
         function calculateQiblaDirection(lat, lng) {
+            // Convert to radians
             const latRad = toRadians(lat);
             const lngRad = toRadians(lng);
             const kaabaLatRad = toRadians(KAABA_LAT);
             const kaabaLngRad = toRadians(KAABA_LNG);
             
-            const y = Math.sin(kaabaLngRad - lngRad);
-            const x = Math.cos(latRad) * Math.tan(kaabaLatRad) - Math.sin(latRad) * Math.cos(kaabaLngRad - lngRad);
+            // Calculate delta longitude
+            const deltaLng = kaabaLngRad - lngRad;
             
-            let angle = toDegrees(Math.atan2(y, x));
-            angle = (angle + 360) % 360;
+            // Spherical law of cosines for initial bearing
+            const y = Math.sin(deltaLng) * Math.cos(kaabaLatRad);
+            const x = Math.cos(latRad) * Math.sin(kaabaLatRad) - 
+                      Math.sin(latRad) * Math.cos(kaabaLatRad) * Math.cos(deltaLng);
             
-            return angle;
+            // Calculate bearing (angle from north)
+            let bearing = toDegrees(Math.atan2(y, x));
+            
+            // Normalize to 0-360 degrees
+            bearing = (bearing + 360) % 360;
+            
+            return bearing;
         }
         
         function updateCompass(angle) {
